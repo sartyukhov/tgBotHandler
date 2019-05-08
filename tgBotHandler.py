@@ -11,25 +11,28 @@ class bot:
     def __init__(self, botID):
         self.botID  = botID
 
-    def sendMessage(self, chatID, text):
+    def sendMessage(self, chatID, text, markdown=False):
+        ''' Send simple text message (with Markdown support)
         '''
-        @ description | Send simple text message (with Markdown support)
-        '''
-        url = 'https://api.telegram.org/bot{b}/sendMessage?chat_id={c}&text={t}&parse_mode=Markdown'\
-            .format(b=self.botID, c=chatID, t=quote(text))
+        if markdown:
+            md = '&parse_mode=Markdown'
+        else:
+            md = ''
+        # now only one parameter, made for future easy changing
+        params = md
+        url = 'https://api.telegram.org/bot{b}/sendMessage?chat_id={c}{p}&text={t}'\
+            .format(b=self.botID, c=chatID, p=params, t=quote(text))
         return urlOpener.getUrlData(url)
 
     def getUpdate(self, offset='0', timeout='60'):
-        '''
-        @ description | Get updates with offset and timeout
+        ''' Get updates with offset and timeout
         '''
         url = 'https://api.telegram.org/bot{b}/getUpdates?offset={o}&timeout={t}'\
             .format(b=self.botID, t=timeout, o=offset)
         return urlOpener.getUrlData(url, name='tg_answer')
 
     def sendInKeyboard(self, chatID, text, args):
-        '''
-        @ description | Send keyboard to user. *args* should be tuple of tuples:
+        ''' Send keyboard to user. *args* should be tuple of tuples:
                         [0] : text
                         [1] : callback_data
         '''
