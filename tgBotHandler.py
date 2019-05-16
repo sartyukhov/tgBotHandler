@@ -11,15 +11,15 @@ class bot:
     def __init__(self, botID):
         self.botID  = botID
 
-    def sendMessage(self, chatID, text, markdown=False):
+    def sendMessage(self, chatID, text, markdown=False, silent=False):
         ''' Send simple text message (with Markdown support)
         '''
+        params = ''
         if markdown:
-            md = '&parse_mode=Markdown'
-        else:
-            md = ''
-        # now only one parameter, made for future easy changing
-        params = md
+            params += '&parse_mode=Markdown'
+        if silent:
+            params += '&disable_notification=True'
+
         url = 'https://api.telegram.org/bot{b}/sendMessage?chat_id={c}{p}&text={t}'\
             .format(b=self.botID, c=chatID, p=params, t=quote(text))
         return urlOpener.getUrlData(url)
