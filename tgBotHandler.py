@@ -46,5 +46,13 @@ class bot:
         url += json.dumps(d)
         return urlOpener.getUrlData(url, name='tg_answer')
 
+    def deleteMessage(self, chatID, messageID):
+        ''' Delete message
+        '''
+        url = 'https://api.telegram.org/bot{b}/deleteMessage?chat_id={c}&message_id={m}'\
+            .format(b=self.botID, c=chatID, m=messageID)
+        return urlOpener.getUrlData(url, name='tg_answer')
+
+
 if __name__ == "__main__":
     pass
