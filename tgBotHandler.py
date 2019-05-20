@@ -29,7 +29,10 @@ class bot:
         '''
         url = 'https://api.telegram.org/bot{b}/getUpdates?offset={o}&timeout={t}'\
             .format(b=self.botID, t=timeout, o=offset)
-        return urlOpener.getUrlData(url, name='tg_answer')
+        if timeout == '0' or timeout == 0 or timeout is None:
+            return urlOpener.getUrlData(url, name='tg_answer')
+        else:
+            return urlOpener.getUrlData(url, name='tg_answer', timeout=(int(timeout) * 2))
 
     def sendInKeyboard(self, chatID, text, args):
         ''' Send keyboard to user. *args* should be tuple of tuples:
