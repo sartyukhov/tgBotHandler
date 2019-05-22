@@ -46,7 +46,7 @@ class bot:
             mass.append([{'text':a[0], 'callback_data':a[1]}])
 
         if addCancel:
-            mass.append([{'text':'Отмена', 'callback_data':'%cancel%'}])
+            mass.append([{'text':'Отмена', 'callback_data':'@cancel@'}])
 
         d = {'inline_keyboard' : mass}
         url += json.dumps(d)
