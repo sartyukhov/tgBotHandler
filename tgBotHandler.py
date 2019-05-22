@@ -34,7 +34,7 @@ class bot:
         else:
             return urlOpener.getUrlData(url, name='tg_answer', timeout=(int(timeout) * 2))
 
-    def sendInKeyboard(self, chatID, text, args):
+    def sendInKeyboard(self, chatID, text, args, addCancel=True):
         ''' Send keyboard to user. *args* should be tuple of tuples:
                         [0] : text
                         [1] : callback_data
@@ -44,6 +44,9 @@ class bot:
         mass = []
         for a in args:
             mass.append([{'text':a[0], 'callback_data':a[1]}])
+
+        if addCancel:
+            mass.append([{'text':'Отмена', 'callback_data':'%cancel%'}])
 
         d = {'inline_keyboard' : mass}
         url += json.dumps(d)
