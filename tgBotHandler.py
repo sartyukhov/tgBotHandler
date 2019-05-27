@@ -34,21 +34,28 @@ class bot:
         else:
             return urlOpener.getUrlData(url, name='tg_answer', timeout=(int(timeout) * 2))
 
-    def sendInKeyboard(self, chatID, text, args, addCancel=True):
+    def sendInKeyboard(self, chatID, text, args, columns=1, addCancel=True):
         ''' Send keyboard to user. *args* should be tuple of tuples:
                         [0] : text
                         [1] : callback_data
         '''
         url = 'https://api.telegram.org/bot{b}/sendMessage?chat_id={c}&text={t}&reply_markup='\
             .format(b=self.botID, c=chatID, t=quote(text))
-        mass = []
+
+        keyboard = []
+        row = []
         for a in args:
-            mass.append([{'text':a[0], 'callback_data':a[1]}])
+            row.append({'text':a[0], 'callback_data':a[1]})
+            if columns <= len(row):
+                keyboard.append(row)
+                row = []
+        if 0 < len(row):
+            keyboard.append(row)
 
         if addCancel:
-            mass.append([{'text':'Отмена', 'callback_data':'@cancel@'}])
+            keyboard.append([{'text':'Отмена', 'callback_data':'@cancel@'}])
 
-        d = {'inline_keyboard' : mass}
+        d = {'inline_keyboard' : keyboard}
         url += json.dumps(d)
         return urlOpener.getUrlData(url, name='tg_answer')
 
