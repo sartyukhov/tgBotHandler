@@ -20,9 +20,10 @@ class bot:
         if silent:
             params += '&disable_notification=True'
 
-        url = 'https://api.telegram.org/bot{b}/sendMessage?chat_id={c}{p}&text={t}'\
-            .format(b=self.botID, c=chatID, p=params, t=quote(text))
-        return urlOpener.getUrlData(url)
+        url = 'https://api.telegram.org/bot{b}/sendMessage?chat_id={c}{p}'\
+            .format(b=self.botID, c=chatID, p=params)
+        data = '&text={}'.format(quote(text))
+        return urlOpener.getUrlData(url, data=data.encode())
 
     def getUpdate(self, offset='0', timeout='60'):
         ''' Get updates with offset and timeout
@@ -39,7 +40,7 @@ class bot:
                         [0] : text
                         [1] : callback_data
         '''
-        url = 'https://api.telegram.org/bot{b}/sendMessage?chat_id={c}&text={t}&reply_markup='\
+        url = 'https://api.telegram.org/bot{b}/sendMessage?chat_id={c}&text={t}'\
             .format(b=self.botID, c=chatID, t=quote(text))
 
         keyboard = []
@@ -55,9 +56,8 @@ class bot:
         if addCancel:
             keyboard.append([{'text':'Отмена', 'callback_data':'@cancel@'}])
 
-        d = {'inline_keyboard' : keyboard}
-        url += json.dumps(d)
-        return urlOpener.getUrlData(url, name='tg_answer')
+        data = '&reply_markup=' + json.dumps({'inline_keyboard' : keyboard})
+        return urlOpener.getUrlData(url, data=data.encode(), name='tg_answer')
 
     def deleteMessage(self, chatID, messageID):
         ''' Delete message
