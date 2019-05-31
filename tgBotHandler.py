@@ -10,38 +10,48 @@ from urlHandler     import urlOpener
 class bot:
     def __init__(self, botID):
         self.botID  = botID
+        self.baseURL = 'https://api.telegram.org/bot{}/'.format(botID)
 
     def sendMessage(self, chatID, text, markdown=False, silent=False):
         ''' Send simple text message (with Markdown support)
         '''
-        params = ''
+        API    = 'sendMessage'
+        url    = '{}{}?'.format(self.baseURL, API)
+        params = '&chat_id={}'.format(chatID)
+
         if markdown:
             params += '&parse_mode=Markdown'
         if silent:
             params += '&disable_notification=True'
 
-        url = 'https://api.telegram.org/bot{b}/sendMessage?chat_id={c}{p}'\
-            .format(b=self.botID, c=chatID, p=params)
-        data = '&text={}'.format(quote(text))
+        data = '{}&text={}'.format(params, quote(text))
         return urlOpener.getUrlData(url, data=data.encode())
 
     def getUpdate(self, offset='0', timeout='60'):
         ''' Get updates with offset and timeout
         '''
-        url = 'https://api.telegram.org/bot{b}/getUpdates?offset={o}&timeout={t}'\
-            .format(b=self.botID, t=timeout, o=offset)
+        API    = 'getUpdates'
+        url    = '{}{}?'.format(self.baseURL, API)
+        params = 'offset={}&timeout={}'.format(offset, timeout)
+
         if timeout == '0' or timeout == 0 or timeout is None:
-            return urlOpener.getUrlData(url, name='tg_answer')
+            return urlOpener.getUrlData(url,\
+                data=params.encode(),\
+                name='tg_answer')
         else:
-            return urlOpener.getUrlData(url, name='tg_answer', timeout=(int(timeout) * 2))
+            return urlOpener.getUrlData(url,\
+                data=params.encode(),\
+                name='tg_answer',\
+                timeout=(int(timeout) * 2))
 
     def sendInKeyboard(self, chatID, text, args, columns=1, addCancel=True):
         ''' Send keyboard to user. *args* should be tuple of tuples:
                         [0] : text
                         [1] : callback_data
         '''
-        url = 'https://api.telegram.org/bot{b}/sendMessage?chat_id={c}&text={t}'\
-            .format(b=self.botID, c=chatID, t=quote(text))
+        API    = 'sendMessage'
+        url    = '{}{}?'.format(self.baseURL, API)
+        params = '&chat_id={}'.format(chatID)
 
         keyboard = []
         row = []
@@ -56,16 +66,17 @@ class bot:
         if addCancel:
             keyboard.append([{'text':'Отмена', 'callback_data':'@cancel@'}])
 
-        data = '&reply_markup=' + json.dumps({'inline_keyboard' : keyboard})
+        data = '{}&text={}&reply_markup={}'\
+            .format(params, quote(text), json.dumps({'inline_keyboard' : keyboard}))
         return urlOpener.getUrlData(url, data=data.encode(), name='tg_answer')
 
     def deleteMessage(self, chatID, messageID):
         ''' Delete message
         '''
-        url = 'https://api.telegram.org/bot{b}/deleteMessage?chat_id={c}&message_id={m}'\
-            .format(b=self.botID, c=chatID, m=messageID)
-        return urlOpener.getUrlData(url, name='tg_answer')
-
+        API    = 'deleteMessage'
+        url    = '{}{}?'.format(self.baseURL, API)
+        params = '&chat_id={}&message_id={}'.format(chatID, messageID)
+        return urlOpener.getUrlData(url, data=params.encode(), name='tg_answer')
 
 if __name__ == "__main__":
     pass
