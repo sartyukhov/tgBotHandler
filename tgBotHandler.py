@@ -107,7 +107,7 @@ class bot:
         params = '&chat_id={}'.format(chatID)
 
         data = '{}&text={}&reply_markup={}'\
-            .format(params, quote(text), json.dumps({"remove_keyboard":true}))
+            .format(params, quote(text), json.dumps({"remove_keyboard":True}))
         return urlOpener.getUrlData(url, data=data.encode(), name='tg_answer')
 
     def deleteMessage(self, chatID, messageID):
