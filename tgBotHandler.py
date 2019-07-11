@@ -28,7 +28,7 @@ class bot:
         data = '{}&text={}'.format(params, quote(text))
         result = urlOpener.getUrlData(url, data=data.encode())
         if callback:
-            callback(result)
+            callback(chatID, result)
         return result
 
     def getUpdate(self, offset='0', timeout='60', allowed_updates=[]):
