@@ -13,7 +13,7 @@ class bot:
         self.baseURL = 'https://api.telegram.org/bot{}/'.format(botID)
         self.allowed_updates = allowed_updates
 
-    def sendMessage(self, chatID, text, markdown=False, silent=False):
+    def sendMessage(self, chatID, text, markdown=False, silent=False, callback=None):
         ''' Send simple text message (with Markdown support)
         '''
         API    = 'sendMessage'
@@ -26,7 +26,10 @@ class bot:
             params += '&disable_notification=True'
 
         data = '{}&text={}'.format(params, quote(text))
-        return urlOpener.getUrlData(url, data=data.encode())
+        result = urlOpener.getUrlData(url, data=data.encode())
+        if callback:
+            callback(result)
+        return result
 
     def getUpdate(self, offset='0', timeout='60', allowed_updates=[]):
         ''' Get updates with offset and timeout
