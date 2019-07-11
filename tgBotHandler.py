@@ -8,10 +8,14 @@ from urllib.parse   import quote
 from urlHandler     import urlOpener
 
 class bot:
-    def __init__(self, botID, allowed_updates=[]):
+    def __init__(self, botID, allowed_updates=[], callback=None):
         self.botID  = botID
         self.baseURL = 'https://api.telegram.org/bot{}/'.format(botID)
         self.allowed_updates = allowed_updates
+        self.callback = callback
+
+    def setCallback(self, callback):
+        self.callback = callback
 
     def sendMessage(self, chatID, text, markdown=False, silent=False, callback=None):
         ''' Send simple text message (with Markdown support)
@@ -27,8 +31,11 @@ class bot:
 
         data = '{}&text={}'.format(params, quote(text))
         result = urlOpener.getUrlData(url, data=data.encode())
-        if callback:
-            callback(chatID, result)
+
+        for cb in (callback, self.callback):
+            if cb:
+                cb(chatID, result)
+                break
         return result
 
     def getUpdate(self, offset='0', timeout='60', allowed_updates=[]):
