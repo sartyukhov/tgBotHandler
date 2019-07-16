@@ -36,7 +36,7 @@ class bot:
         for cb in (callback, self.callback):
             if cb is not None:
                 if callable(cb):
-                    cb(chatID, result)
+                    cb({'uid':chatID, 'answer':result})
                 break
         return result
 
