@@ -15,7 +15,8 @@ class bot:
         self.callback = callback
 
     def setCallback(self, callback):
-        self.callback = callback
+        if callable(callback):
+            self.callback = callback
 
     def sendMessage(self, chatID, text, markdown=False, silent=False, callback=None):
         ''' Send simple text message (with Markdown support)
@@ -33,8 +34,9 @@ class bot:
         result = urlOpener.getUrlData(url, data=data.encode())
 
         for cb in (callback, self.callback):
-            if cb:
-                cb(chatID, result)
+            if cb is not None:
+                if callable(cb):
+                    cb(chatID, result)
                 break
         return result
 
