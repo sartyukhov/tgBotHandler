@@ -3,6 +3,7 @@
 
 # libs includes
 import json
+from re             import finditer
 from urllib.parse   import quote
 # project includes
 from urlHandler     import urlOpener
@@ -12,26 +13,57 @@ class bot:
         self.botID  = botID
         self.baseURL = 'https://api.telegram.org/bot{}/'.format(botID)
         self.allowed_updates = allowed_updates
-        self.callback = callback
+        self.setCallback(callback)
 
     def setCallback(self, callback):
         if callable(callback):
             self.callback = callback
+        else:
+            self.callback = None
 
-    def sendMessage(self, chatID, text, markdown=False, silent=False, callback=None):
+
+    def __textSeparator(self, text, num=4096, sep='\n'):
+        indexes = [i.end() for i in finditer(sep, text)]
+
+        if len(indexes) > 0:
+            s = 0
+            p = indexes[0]
+            N = num
+            for i in indexes:
+                if i >= N and p > s:
+                    yield text[s:p]
+                    s = p
+                    N = p + num
+                if i == indexes[len(indexes) - 1]:
+                    yield text[s:]
+                p = i
+        else:
+            yield text
+
+    def sendMessage(self, chatID, text, markdown=False, silent=False, callback=None,
+        symbInOne=4096, separator='\n'):
         ''' Send simple text message (with Markdown support)
+                chatID - telegram user id
+                text - message
+                markdown - text with markdown inserts
+                silent - send with norification or not
+                callback - function to call after all
+                symbInOne - max symbols in one message
+                separator - symbol to separate message when control length
         '''
         API    = 'sendMessage'
         url    = '{}{}?'.format(self.baseURL, API)
         params = '&chat_id={}'.format(chatID)
+        result = ''
 
         if markdown:
             params += '&parse_mode=Markdown'
         if silent:
             params += '&disable_notification=True'
 
-        data = '{}&text={}'.format(params, quote(text))
-        result = urlOpener.getUrlData(url, data=data.encode())
+        for t in self.__textSeparator(text, symbInOne, separator):
+            data = '{}&text={}'.format(params, quote(t))
+            result = urlOpener.getUrlData(url, data=data.encode())
 
         for cb in (callback, self.callback):
             if cb is not None:
@@ -106,8 +138,8 @@ class bot:
             keyboard.append(row)
 
         data = '{}&text={}&reply_markup={}'\
-            .format(params, 
-                quote(text), 
+            .format(params,
+                quote(text),
                 json.dumps({'keyboard' : keyboard, "one_time_keyboard":oneTime}))
         return urlOpener.getUrlData(url, data=data.encode(), name='tg_answer')
 
@@ -129,6 +161,3 @@ class bot:
         url    = '{}{}?'.format(self.baseURL, API)
         params = '&chat_id={}&message_id={}'.format(chatID, messageID)
         return urlOpener.getUrlData(url, data=params.encode(), name='tg_answer')
-
-if __name__ == "__main__":
-    pass
