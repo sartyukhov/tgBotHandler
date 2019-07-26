@@ -3,7 +3,7 @@
 
 # libs includes
 import json
-from re             import finditer
+from re             import finditer, sub
 from urllib.parse   import quote
 # project includes
 from urlHandler     import urlOpener
@@ -21,24 +21,31 @@ class bot:
         else:
             self.callback = None
 
+    def __textSeparator(self, text, num=4095, sep='\n'):
+        def unMarkdwn(mdText):
+            ''' Delete urls from markdown text
+            '''
+            return sub(r'\[([^]]*)\]\([^)]*\)', r'\1', mdText)
 
-    def __textSeparator(self, text, num=4096, sep='\n'):
-        indexes = [i.end() for i in finditer(sep, text)]
-
-        if len(indexes) > 0:
-            s = 0
-            p = indexes[0]
-            N = num
-            for i in indexes:
-                if i >= N and p > s:
-                    yield text[s:p]
-                    s = p
-                    N = p + num
-                if i == indexes[len(indexes) - 1]:
-                    yield text[s:]
-                p = i
-        else:
+        if len(unMarkdwn(text)) <= num:
             yield text
+        else:
+            indexes = [i.end() for i in finditer(sep, text)]
+            if indexes.count(len(text)) == 0:
+                indexes.append(len(text))
+
+            if len(indexes) > 1:
+                s = 0
+                p = indexes[0]
+                for i in indexes:
+                    if len(unMarkdwn(text[s:i])) > num:
+                        yield text[s:p]
+                        s = p
+                    if i == indexes[len(indexes) - 1]:
+                        yield from self.__textSeparator(text[s:i], num)
+                    p = i
+            else:
+                yield from  self.__textSeparator(text, num, sep='')
 
     def sendMessage(self, chatID, text, markdown=False, silent=False, callback=None,
         symbInOne=4096, separator='\n'):
