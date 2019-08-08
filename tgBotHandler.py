@@ -21,7 +21,7 @@ class bot:
         else:
             self.callback = None
 
-    def __textSeparator(self, text, num=4095, sep='\n'):
+    def __textSeparator(self, text, num, sep='\n'):
         def unMarkdwn(mdText):
             ''' Delete urls from markdown text
             '''
@@ -48,7 +48,7 @@ class bot:
                 yield from  self.__textSeparator(text, num, sep='')
 
     def sendMessage(self, chatID, text, markdown=False, silent=False, callback=None,
-        symbInOne=4096, separator='\n'):
+        symbInOne=4095, separator='\n'):
         ''' Send simple text message (with Markdown support)
                 chatID - telegram user id
                 text - message
