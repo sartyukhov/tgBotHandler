@@ -21,13 +21,16 @@ class bot:
         else:
             self.callback = None
 
-    def __textSeparator(self, text, num, sep='\n'):
-        def unMarkdwn(mdText):
-            ''' Delete urls from markdown text
-            '''
-            return sub(r'\[([^]]*)\]\([^)]*\)', r'\1', mdText)
+    def __textSeparator(self, text, unMdMax, sep='\n', mdMax=10240):
+        ''' Separate text with your separator
+        '''
+        def lenIsOk(text):
+            """ This functions checks condition of yielding text
+            """
+            return (len(sub(r'\[([^]]*)\]\([^)]*\)', r'\1', text)) < unMdMax) and \
+                (len(text) < mdMax)
 
-        if len(unMarkdwn(text)) <= num:
+        if lenIsOk(text):
             yield text
         else:
             indexes = [i.end() for i in finditer(sep, text)]
@@ -38,14 +41,14 @@ class bot:
                 s = 0
                 p = indexes[0]
                 for i in indexes:
-                    if len(unMarkdwn(text[s:i])) > num:
+                    if not lenIsOk(text[s:i]):
                         yield text[s:p]
                         s = p
-                    if i == indexes[len(indexes) - 1]:
-                        yield from self.__textSeparator(text[s:i], num)
+                    if i == indexes[-1]:
+                        yield from self.__textSeparator(text[s:i], unMdMax, mdMax=mdMax)
                     p = i
             else:
-                yield from  self.__textSeparator(text, num, sep='')
+                yield from  self.__textSeparator(text, unMdMax, sep='', mdMax=mdMax)
 
     def sendMessage(self, chatID, text, markdown=False, silent=False, callback=None,
         symbInOne=4095, separator='\n'):
